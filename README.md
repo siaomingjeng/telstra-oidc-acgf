@@ -1,12 +1,7 @@
 # What is Kong OIDC plugin
 
-[![Join the chat at https://gitter.im/nokia/kong-oidc](https://badges.gitter.im/nokia/kong-oidc.svg)](https://gitter.im/nokia/kong-oidc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-**Continuous Integration:** [![Build Status](https://travis-ci.org/nokia/kong-oidc.svg?branch=master)](https://travis-ci.org/nokia/kong-oidc) 
-[![Coverage Status](https://coveralls.io/repos/github/nokia/kong-oidc/badge.svg?branch=master)](https://coveralls.io/github/nokia/kong-oidc?branch=master) <br/>
-
-**kong-oidc** is a plugin for [Kong](https://github.com/Mashape/kong) implementing the
-[OpenID Connect](http://openid.net/specs/openid-connect-core-1_0.html) Relying Party (RP) functionality.
+**telstra-oidc-acgf** is a plugin for [Kong](https://github.com/Mashape/kong) implementing the
+[OpenID Connect](http://openid.net/specs/openid-connect-core-1_0.html) Relying Party (RP) functionality. This plugin only contains Authorization Code Grant Flow and developed based on [nokia/kong-oidc](https://github.com/nokia/kong-oidc). Fow these who want to use Client Credentials Grant Flow, please jump to [telstra-oidc-ccgf](https://github.com/siaomingjeng/telstra-oidc-ccgf).
 
 It authenticates users against an OpenID Connect Provider using
 [OpenID Connect Discovery](http://openid.net/specs/openid-connect-discovery-1_0.html)
@@ -18,12 +13,13 @@ in of the server-side storage mechanisms `shared-memory|memcache|redis`.
 
 It supports server-wide caching of resolved Discovery documents and validated Access Tokens.
 
-It can be used as a reverse proxy terminating OAuth/OpenID Connect in front of an origin server so that
-the origin server/services can be protected with the relevant standards without implementing those on
-the server itself.
+It can be used as a reverse proxy terminating OAuth/OpenID Connect in front of an origin server so that the origin server/services can be protected with the relevant standards without implementing those on the server itself.
 
-Introspection functionality add capability for already authenticated users and/or applications that
-already posses acces token to go through kong. The actual token verification is then done by Resource Server.
+Introspection functionality add capability for already authenticated users and/or applications that already posses acces token to go through kong. The actual token verification is then done by Resource Server.
+
+
+## Kong Community Version Support
+ This plugin is developed and tested in Kong CE V1.4.\* and V1.5.\*. It does not work on V2.\*. due to the compabible issue between KongCE V2.0 and library 'hmac.lua'.
 
 ## How does it work
 
@@ -48,7 +44,7 @@ ngx.ctx.authenticated_consumer = {
 
 ## Dependencies
 
-**kong-oidc** depends on the following package:
+**telstra-oidc-acgf** depends on the following package:
 
 - [`lua-resty-openidc`](https://github.com/pingidentity/lua-resty-openidc/)
 
@@ -57,11 +53,11 @@ ngx.ctx.authenticated_consumer = {
 
 If you're using `luarocks` execute the following:
 
-     luarocks install kong-oidc
+     luarocks install telstra-oidc-acgf
 
-You also need to set the `KONG_PLUGINS` environment variable
+You also need to set the `plugins` parameter:
 
-     export KONG_PLUGINS=oidc
+     plugins = bundled,telstra-oidc-acgf
      
 ## Usage
 
@@ -72,8 +68,9 @@ You also need to set the `KONG_PLUGINS` environment variable
 | `name` || true | plugin name, has to be `oidc` |
 | `config.client_id` || true | OIDC Client ID |
 | `config.client_secret` || true | OIDC Client secret |
-| `config.discovery` | https://.well-known/openid-configuration | false | OIDC Discovery Endpoint (`/.well-known/openid-configuration`) |
+| `config.discovery` | https://.well-known/openid-configuration | false | OIDC Discovery Endpoint|
 | `config.scope` | openid | false| OAuth2 Token scope. To use OIDC it has to contains the `openid` scope |
+| `config.redirect_uri`||false|Full redirect URI or Path for currect Host|
 | `config.ssl_verify` | false | false | Enable SSL verification to OIDC Provider |
 | `config.session_secret` | | false | Additional parameter, which is used to encrypt the session cookie. Needs to be random |
 | `config.introspection_endpoint` | | false | Token introspection endpoint |
@@ -157,32 +154,4 @@ Cookie: session=KOn1am4mhQLKazlCA.....
 X-Userinfo: eyJnaXZlbl9uYW1lIjoixITEmMWaw5PFgcW7xbnEhiIsInN1YiI6ImM4NThiYzAxLTBiM2ItNDQzNy1hMGVlLWE1ZTY0ODkwMDE5ZCIsInByZWZlcnJlZF91c2VybmFtZSI6ImFkbWluIiwibmFtZSI6IsSExJjFmsOTxYHFu8W5xIYiLCJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOiJjODU4YmMwMS0wYjNiLTQ0MzctYTBlZS1hNWU2NDg5MDAxOWQifQ==
 X-Access-Token: eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJGenFSY0N1Ry13dzlrQUJBVng1ZG9sT2ZwTFhBNWZiRGFlVDRiemtnSzZRIn0.eyJqdGkiOiIxYjhmYzlkMC1jMjlmLTQwY2ItYWM4OC1kNzMyY2FkODcxY2IiLCJleHAiOjE1NDg1MTA4MjksIm5iZiI6MCwiaWF0IjoxNTQ4NTEwNzY5LCJpc3MiOiJodHRwOi8vMTkyLjE2OC4wLjk6ODA4MC9hdXRoL3JlYWxtcy9tYXN0ZXIiLCJhdWQiOlsibWFzdGVyLXJlYWxtIiwiYWNjb3VudCJdLCJzdWIiOiJhNmE3OGQ5MS01NDk0LTRjZTMtOTU1NS04NzhhMTg1Y2E0YjkiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJrb25nIiwibm9uY2UiOiJmNGRkNDU2YzBjZTY4ZmFmYWJmNGY4ZDA3YjQ0YWE4NiIsImF1dGhfdGltZSI6…IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbiJ9.GWuguFjSEDGxw_vbD04UMKxtai15BE2lwBO0YkSzp-NKZ2SxAzl0nyhZxpP0VTzk712nQ8f_If5-mQBf_rqEVnOraDmX5NOXP0B8AoaS1jsdq4EomrhZGqlWmuaV71Cnqrw66iaouBR_6Q0s8bgc1FpCPyACM4VWs57CBdTrAZ2iv8dau5ODkbEvSgIgoLgBbUvjRKz1H0KyeBcXlVSgHJ_2zB9q2HvidBsQEIwTP8sWc6er-5AltLbV8ceBg5OaZ4xHoramMoz2xW-ttjIujS382QQn3iekNByb62O2cssTP3UYC747ehXReCrNZmDA6ecdnv8vOfIem3xNEnEmQw
 X-Id-Token: eyJuYmYiOjAsImF6cCI6ImtvbmciLCJpYXQiOjE1NDg1MTA3NjksImlzcyI6Imh0dHA6XC9cLzE5Mi4xNjguMC45OjgwODBcL2F1dGhcL3JlYWxtc1wvbWFzdGVyIiwiYXVkIjoia29uZyIsIm5vbmNlIjoiZjRkZDQ1NmMwY2U2OGZhZmFiZjRmOGQwN2I0NGFhODYiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbiIsImF1dGhfdGltZSI6MTU0ODUxMDY5NywiYWNyIjoiMSIsInNlc3Npb25fc3RhdGUiOiJiNDZmODU2Ny0zODA3LTQ0YmMtYmU1Mi1iMTNiNWQzODI5MTQiLCJleHAiOjE1NDg1MTA4MjksImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwianRpIjoiMjI1ZDRhNDItM2Y3ZC00Y2I2LTkxMmMtOGNkYzM0Y2JiNTk2Iiwic3ViIjoiYTZhNzhkOTEtNTQ5NC00Y2UzLTk1NTUtODc4YTE4NWNhNGI5IiwidHlwIjoiSUQifQ==
-```
-
-
-## Development
-
-### Running Unit Tests
-
-To run unit tests, run the following command:
-
-```
-./bin/run-unit-tests.sh
-```
-
-This may take a while for the first run, as the docker image will need to be built, but subsequent runs will be quick.
-
-### Building the Integration Test Environment
-
-To build the integration environment (Kong with the oidc plugin enabled, and Keycloak as the OIDC Provider), you will first need to find your computer's IP, and assign that to the environment variable `IP`. Finally, you will run the `./bin/build-env.sh` command. Here's an example:
-
-```
-export IP=192.168.0.1
-./bin/build-env.sh
-```
-
-To tear the environment down:
-
-```
-./bin/teardown-env.sh
 ```
