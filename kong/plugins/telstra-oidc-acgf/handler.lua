@@ -4,7 +4,7 @@ local utils = require("kong.plugins.telstra-oidc-acgf.utils")
 local filter = require("kong.plugins.telstra-oidc-acgf.filter")
 local session = require("kong.plugins.telstra-oidc-acgf.session")
 
-OidcHandler.PRIORITY = 1000
+OidcHandler.PRIORITY = 999
 
 -- Testing only below ---
 local function table_to_string(tbl)
@@ -32,7 +32,6 @@ end
 function OidcHandler:access(config)
   OidcHandler.super.access(self)
   local oidcConfig = utils.get_options(config, ngx)
-
   if filter.shouldProcessRequest(oidcConfig) then
     session.configure(config)
     handle(oidcConfig)

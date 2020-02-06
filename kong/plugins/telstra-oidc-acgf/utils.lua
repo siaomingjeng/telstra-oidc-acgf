@@ -44,7 +44,6 @@ function M.get_redirect_uri_path(ngx)
 
   local function tackle_slash(path)
     local args = ngx.req.get_uri_args()
-    ngx.log(ngx.ERR, "RAY-TEST-UTILS: args=", table_to_string(args)," PATH: ",path)  -- testing
     if args and args.code then
       return path
     elseif path:sub(-1) == "/" then

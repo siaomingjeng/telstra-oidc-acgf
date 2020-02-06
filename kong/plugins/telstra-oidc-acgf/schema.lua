@@ -1,11 +1,28 @@
 local typedefs = require "kong.db.schema.typedefs"
 
+local function validate_params(conf)
+  -- check redirect_uri
+  local value = conf.redirect_uri
+  if value == ngx.null or value == nil or value == "" then
+    return true
+  end
+  if value:sub(1,1) == "/" then
+    return true
+  end
+  if value:lower():sub(1,4) == "http" then
+    return true
+  end
+  return false, "URL input error: this value can only be empty or start with / or http or HTTP."
+end
+
+
 return {
   name = "telstra-oidc-acgf",
   fields = {
     { protocols = typedefs.protocols_http },
     { config = {
         type = "record",
+        custom_validator = validate_params,
         fields = {
           { client_id = { type = "string", required = true }, },
           { client_secret = { type = "string", required = true }, },
